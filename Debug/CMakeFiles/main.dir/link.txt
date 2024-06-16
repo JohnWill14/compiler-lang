@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG -rdynamic CMakeFiles/main.dir/parser.c.o CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/lex.yy.c.o -o main
