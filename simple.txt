@@ -1,0 +1,3 @@
+def main(test: String): Void{
+    println("Hello World!!!");
+}
