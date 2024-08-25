@@ -7,13 +7,9 @@ DECLARATIONS
 /* OPERATIONS: Internal Representation */
 #include "List.h"
 
-enum code_ops { DEF, PRIMITIVE, PARAMETERS, PARAMETER, BLOCK, PRINT_FUN };
-char *op_name[] = {"function", "primitivo", "parametros", "unico parametro", "bloco","printf"};
-typedef enum code_ops Code;
-
 struct tree{
     char* label;
-    Code command;
+    int command;
     List* neighbors;
     struct tree* parent;
 };
@@ -22,13 +18,17 @@ typedef struct tree Tree;
 
 /* CODE Array */
 List* trees;
+List* trees_history;
 
 Tree* current_tree;
 
-Tree*  init_no(char* label, Code command){
+Tree*  init_no(char* label, int command){
 
   if(trees == NULL){
     trees = list_create();
+  }
+  if(trees_history == NULL){
+    trees_history = list_create();
   }
 
   Tree* tree_no = alloc(1, Tree, Tree*);
@@ -45,7 +45,7 @@ Tree*  init_no(char* label, Code command){
 
 }
 
-void create_no(char* label, Code command){
+void create_no(char* label, int command){
   Tree* tree_no = init_no(label, command);
   
   if(current_tree == NULL){
@@ -70,18 +70,9 @@ void revert_no(){
 
 void finalize_tree(){
     current_tree = NULL;
+    if(trees != NULL){
+      Node* no = list_getItem(trees, 0);
+      list_add(trees_history, no->value);
+      trees = NULL;
+    }
 }
-
-
-/*-------------------------------------------------------------------------
-Registers
--------------------------------------------------------------------------*/
-
-/*=========================================================================
-Fetch Execute Cycle
-=========================================================================*/
-void generate_code_in_C(){
-
-}
-
-/*************************** End Stack Machine **************************/

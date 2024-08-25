@@ -2,16 +2,9 @@ Terminals unused in grammar
 
     NUMBER
     REAL
-    IF
-    ELSE
     FOR
-    WHILE
     LOOP
     IN
-    COMPARISON
-    LB
-    RB
-    LOGIC
     '-'
     '+'
     '*'
@@ -19,39 +12,107 @@ Terminals unused in grammar
     '^'
 
 
+State 83 conflicts: 1 shift/reduce
+
+
 Grammar
 
     0 $accept: program $end
 
-    1 $@1: ε
+    1 program: function code
 
-    2 $@2: ε
+    2 code: ε
+    3     | program
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
+    4 $@1: ε
 
-    4 declarations_parameter: ε
-    5                       | IDENTIFIER COLON TYPE declaration_parameter
+    5 $@2: ε
 
-    6 declaration_parameter: ε
-    7                      | COMMA declarations_parameter
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
 
-    8 block: ε
-    9      | command block
+    7 declarations_parameter: ε
+    8                       | IDENTIFIER COLON TYPE declaration_parameter
 
-   10 command: PRINT LP TEXT RP FINALIZE
-   11        | VAR declaration
-   12        | VAL declaration
-   13        | attribution
+    9 declaration_parameter: ε
+   10                      | COMMA declarations_parameter
 
-   14 declarations: COMMA declaration
-   15             | FINALIZE
+   11 block: ε
+   12      | command block
 
-   16 declaration: IDENTIFIER COMMA TYPE declarations
+   13 command: PRINT LP TEXT RP FINALIZE
+   14        | VAR declaration
+   15        | VAL declaration
+   16        | attribution
+   17        | while
+   18        | condition
+   19        | breakkk
+   20        | return_ss
 
-   17 attribution: IDENTIFIER ALLOC operation
+   21 declarations: COMMA declaration
+   22             | FINALIZE
 
-   18 operation: NUM
-   19          | NUM MATH NUM
+   23 $@3: ε
+
+   24 declaration: IDENTIFIER $@3 COLON TYPE declarations
+
+   25 $@4: ε
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE LB NUM RB declarations
+
+   27 $@5: ε
+
+   28 attribution: IDENTIFIER ALLOC $@5 novo_valor
+
+   29 novo_valor: operation
+   30           | label_abstrato
+
+   31 operation: NUM
+
+   32 $@6: ε
+
+   33 operation: operation MATH $@6 operation
+
+   34 label_abstrato: LC item_array RC FINALIZE
+   35               | TEXT
+   36               | IDENTIFIER
+
+   37 item_array: novo_valor item_array_final
+
+   38 item_array_final: ε
+   39                 | COMMA item_array
+
+   40 $@7: ε
+
+   41 $@8: ε
+
+   42 while: WHILE LP $@7 logik RP $@8 LC block RC
+
+   43 logik: IDENTIFIER COMPARISON IDENTIFIER logic_c
+
+   44 logic_c: ε
+   45        | LOGIC logik
+
+   46 $@9: ε
+
+   47 $@10: ε
+
+   48 condition: IF LP $@9 logik RP $@10 LC block RC condition_pod
+
+   49 $@11: ε
+
+   50 $@12: ε
+
+   51 condition_pod: ELSE RP $@11 LC block RC $@12 condition_final
+   52              | condition_final
+
+   53 condition_final: ε
+
+   54 breakkk: BREAK_TOKEN FINALIZE
+
+   55 return_ss: RETURN_TOKEN FINALIZE
+   56          | RETURN_TOKEN IDENTIFIER FINALIZE
+   57          | RETURN_TOKEN TEXT FINALIZE
+   58          | RETURN_TOKEN operation FINALIZE
 
 
 Terminals, with rules where they appear
@@ -65,72 +126,146 @@ Terminals, with rules where they appear
     error (256)
     NUMBER <intval> (258)
     REAL <doubleval> (259)
-    IDENTIFIER <id> (260) 3 5 16 17
-    IF <lbls> (261)
-    ELSE <lbls> (262)
+    IDENTIFIER <id> (260) 6 8 24 26 28 36 43 56
+    IF <lbls> (261) 48
+    ELSE <lbls> (262) 51
     FOR <lbls> (263)
-    WHILE <lbls> (264)
+    WHILE <lbls> (264) 42
     LOOP <lbls> (265)
-    TYPE <id> (266) 3 5 16
-    TEXT <id> (267) 10
-    FUN (268) 3
-    VAR (269) 11
-    VAL (270) 12
+    TYPE <id> (266) 6 8 24 26
+    TEXT <id> (267) 13 35 57
+    FUN (268) 6
+    VAR (269) 14
+    VAL (270) 15
     IN (271)
-    NUM (272) 18 19
-    COMPARISON (273)
-    ALLOC (274) 17
-    LP (275) 3 10
-    RP (276) 3 10
-    LC (277) 3
-    RC (278) 3
-    LB (279)
-    RB (280)
-    MATH (281) 19
-    COLON (282) 3 5
-    COMMA (283) 7 14 16
-    LOGIC (284)
-    FINALIZE (285) 10 15
-    PRINT (286) 10
+    NUM (272) 26 31
+    COMPARISON (273) 43
+    ALLOC (274) 28
+    LP (275) 6 13 42 48
+    RP (276) 6 13 42 48 51
+    LC (277) 6 34 42 48 51
+    RC (278) 6 34 42 48 51
+    LB (279) 26
+    RB (280) 26
+    MATH (281) 33
+    COLON (282) 6 8 24
+    COMMA (283) 10 21 26 39
+    LOGIC (284) 45
+    FINALIZE (285) 13 22 34 54 55 56 57 58
+    PRINT (286) 13
+    BREAK_TOKEN (287) 54
+    RETURN_TOKEN (288) 55 56 57 58
 
 
 Nonterminals, with rules where they appear
 
-    $accept (37)
+    $accept (39)
         on left: 0
-    program (38)
-        on left: 3
-        on right: 0
-    $@1 (39)
+    program (40)
         on left: 1
-        on right: 3
-    $@2 (40)
-        on left: 2
-        on right: 3
-    declarations_parameter (41)
-        on left: 4 5
-        on right: 3 7
-    declaration_parameter (42)
-        on left: 6 7
-        on right: 5
-    block (43)
-        on left: 8 9
-        on right: 3 9
-    command (44)
-        on left: 10 11 12 13
-        on right: 9
-    declarations (45)
-        on left: 14 15
+        on right: 0 3
+    code (41)
+        on left: 2 3
+        on right: 1
+    function (42)
+        on left: 6
+        on right: 1
+    $@1 (43)
+        on left: 4
+        on right: 6
+    $@2 (44)
+        on left: 5
+        on right: 6
+    declarations_parameter (45)
+        on left: 7 8
+        on right: 6 10
+    declaration_parameter (46)
+        on left: 9 10
+        on right: 8
+    block (47)
+        on left: 11 12
+        on right: 6 12 42 48 51
+    command (48)
+        on left: 13 14 15 16 17 18 19 20
+        on right: 12
+    declarations (49)
+        on left: 21 22
+        on right: 24 26
+    declaration (50)
+        on left: 24 26
+        on right: 14 15 21
+    $@3 (51)
+        on left: 23
+        on right: 24
+    $@4 (52)
+        on left: 25
+        on right: 26
+    attribution (53)
+        on left: 28
         on right: 16
-    declaration (46)
-        on left: 16
-        on right: 11 12 14
-    attribution (47)
-        on left: 17
-        on right: 13
-    operation (48)
-        on left: 18 19
+    $@5 (54)
+        on left: 27
+        on right: 28
+    novo_valor (55)
+        on left: 29 30
+        on right: 28 37
+    operation (56)
+        on left: 31 33
+        on right: 29 33 58
+    $@6 (57)
+        on left: 32
+        on right: 33
+    label_abstrato (58)
+        on left: 34 35 36
+        on right: 30
+    item_array (59)
+        on left: 37
+        on right: 34 39
+    item_array_final (60)
+        on left: 38 39
+        on right: 37
+    while (61)
+        on left: 42
         on right: 17
+    $@7 (62)
+        on left: 40
+        on right: 42
+    $@8 (63)
+        on left: 41
+        on right: 42
+    logik (64)
+        on left: 43
+        on right: 42 45 48
+    logic_c (65)
+        on left: 44 45
+        on right: 43
+    condition (66)
+        on left: 48
+        on right: 18
+    $@9 (67)
+        on left: 46
+        on right: 48
+    $@10 (68)
+        on left: 47
+        on right: 48
+    condition_pod (69)
+        on left: 51 52
+        on right: 48
+    $@11 (70)
+        on left: 49
+        on right: 51
+    $@12 (71)
+        on left: 50
+        on right: 51
+    condition_final (72)
+        on left: 53
+        on right: 51 52
+    breakkk (73)
+        on left: 54
+        on right: 19
+    return_ss (74)
+        on left: 55 56 57 58
+        on right: 20
 
 
 State 0
@@ -139,367 +274,1034 @@ State 0
 
     FUN  shift, and go to state 1
 
-    program  go to state 2
+    program   go to state 2
+    function  go to state 3
 
 
 State 1
 
-    3 program: FUN • IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
+    6 function: FUN • IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
 
-    IDENTIFIER  shift, and go to state 3
+    IDENTIFIER  shift, and go to state 4
 
 
 State 2
 
     0 $accept: program • $end
 
-    $end  shift, and go to state 4
+    $end  shift, and go to state 5
 
 
 State 3
 
-    3 program: FUN IDENTIFIER • $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
+    1 program: function • code
 
-    $default  reduce using rule 1 ($@1)
+    FUN  shift, and go to state 1
 
-    $@1  go to state 5
+    $default  reduce using rule 2 (code)
+
+    program   go to state 6
+    code      go to state 7
+    function  go to state 3
 
 
 State 4
+
+    6 function: FUN IDENTIFIER • $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC
+
+    $default  reduce using rule 4 ($@1)
+
+    $@1  go to state 8
+
+
+State 5
 
     0 $accept: program $end •
 
     $default  accept
 
 
-State 5
-
-    3 program: FUN IDENTIFIER $@1 • LP declarations_parameter RP COLON TYPE $@2 LC block RC
-
-    LP  shift, and go to state 6
-
-
 State 6
 
-    3 program: FUN IDENTIFIER $@1 LP • declarations_parameter RP COLON TYPE $@2 LC block RC
+    3 code: program •
 
-    IDENTIFIER  shift, and go to state 7
-
-    $default  reduce using rule 4 (declarations_parameter)
-
-    declarations_parameter  go to state 8
+    $default  reduce using rule 3 (code)
 
 
 State 7
 
-    5 declarations_parameter: IDENTIFIER • COLON TYPE declaration_parameter
+    1 program: function code •
 
-    COLON  shift, and go to state 9
+    $default  reduce using rule 1 (program)
 
 
 State 8
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter • RP COLON TYPE $@2 LC block RC
+    6 function: FUN IDENTIFIER $@1 • LP declarations_parameter RP COLON TYPE $@2 LC block RC
 
-    RP  shift, and go to state 10
+    LP  shift, and go to state 9
 
 
 State 9
 
-    5 declarations_parameter: IDENTIFIER COLON • TYPE declaration_parameter
+    6 function: FUN IDENTIFIER $@1 LP • declarations_parameter RP COLON TYPE $@2 LC block RC
 
-    TYPE  shift, and go to state 11
+    IDENTIFIER  shift, and go to state 10
+
+    $default  reduce using rule 7 (declarations_parameter)
+
+    declarations_parameter  go to state 11
 
 
 State 10
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP • COLON TYPE $@2 LC block RC
+    8 declarations_parameter: IDENTIFIER • COLON TYPE declaration_parameter
 
     COLON  shift, and go to state 12
 
 
 State 11
 
-    5 declarations_parameter: IDENTIFIER COLON TYPE • declaration_parameter
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter • RP COLON TYPE $@2 LC block RC
 
-    COMMA  shift, and go to state 13
-
-    $default  reduce using rule 6 (declaration_parameter)
-
-    declaration_parameter  go to state 14
+    RP  shift, and go to state 13
 
 
 State 12
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON • TYPE $@2 LC block RC
+    8 declarations_parameter: IDENTIFIER COLON • TYPE declaration_parameter
 
-    TYPE  shift, and go to state 15
+    TYPE  shift, and go to state 14
 
 
 State 13
 
-    7 declaration_parameter: COMMA • declarations_parameter
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP • COLON TYPE $@2 LC block RC
 
-    IDENTIFIER  shift, and go to state 7
-
-    $default  reduce using rule 4 (declarations_parameter)
-
-    declarations_parameter  go to state 16
+    COLON  shift, and go to state 15
 
 
 State 14
 
-    5 declarations_parameter: IDENTIFIER COLON TYPE declaration_parameter •
+    8 declarations_parameter: IDENTIFIER COLON TYPE • declaration_parameter
 
-    $default  reduce using rule 5 (declarations_parameter)
+    COMMA  shift, and go to state 16
+
+    $default  reduce using rule 9 (declaration_parameter)
+
+    declaration_parameter  go to state 17
 
 
 State 15
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE • $@2 LC block RC
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON • TYPE $@2 LC block RC
 
-    $default  reduce using rule 2 ($@2)
-
-    $@2  go to state 17
+    TYPE  shift, and go to state 18
 
 
 State 16
 
-    7 declaration_parameter: COMMA declarations_parameter •
+   10 declaration_parameter: COMMA • declarations_parameter
 
-    $default  reduce using rule 7 (declaration_parameter)
+    IDENTIFIER  shift, and go to state 10
+
+    $default  reduce using rule 7 (declarations_parameter)
+
+    declarations_parameter  go to state 19
 
 
 State 17
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 • LC block RC
+    8 declarations_parameter: IDENTIFIER COLON TYPE declaration_parameter •
 
-    LC  shift, and go to state 18
+    $default  reduce using rule 8 (declarations_parameter)
 
 
 State 18
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC • block RC
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE • $@2 LC block RC
 
-    IDENTIFIER  shift, and go to state 19
-    VAR         shift, and go to state 20
-    VAL         shift, and go to state 21
-    PRINT       shift, and go to state 22
+    $default  reduce using rule 5 ($@2)
 
-    $default  reduce using rule 8 (block)
-
-    block        go to state 23
-    command      go to state 24
-    attribution  go to state 25
+    $@2  go to state 20
 
 
 State 19
 
-   17 attribution: IDENTIFIER • ALLOC operation
+   10 declaration_parameter: COMMA declarations_parameter •
 
-    ALLOC  shift, and go to state 26
+    $default  reduce using rule 10 (declaration_parameter)
 
 
 State 20
 
-   11 command: VAR • declaration
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 • LC block RC
 
-    IDENTIFIER  shift, and go to state 27
-
-    declaration  go to state 28
+    LC  shift, and go to state 21
 
 
 State 21
 
-   12 command: VAL • declaration
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC • block RC
 
-    IDENTIFIER  shift, and go to state 27
+    IDENTIFIER    shift, and go to state 22
+    IF            shift, and go to state 23
+    WHILE         shift, and go to state 24
+    VAR           shift, and go to state 25
+    VAL           shift, and go to state 26
+    PRINT         shift, and go to state 27
+    BREAK_TOKEN   shift, and go to state 28
+    RETURN_TOKEN  shift, and go to state 29
 
-    declaration  go to state 29
+    $default  reduce using rule 11 (block)
+
+    block        go to state 30
+    command      go to state 31
+    attribution  go to state 32
+    while        go to state 33
+    condition    go to state 34
+    breakkk      go to state 35
+    return_ss    go to state 36
 
 
 State 22
 
-   10 command: PRINT • LP TEXT RP FINALIZE
+   28 attribution: IDENTIFIER • ALLOC $@5 novo_valor
 
-    LP  shift, and go to state 30
+    ALLOC  shift, and go to state 37
 
 
 State 23
 
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block • RC
+   48 condition: IF • LP $@9 logik RP $@10 LC block RC condition_pod
 
-    RC  shift, and go to state 31
+    LP  shift, and go to state 38
 
 
 State 24
 
-    9 block: command • block
+   42 while: WHILE • LP $@7 logik RP $@8 LC block RC
 
-    IDENTIFIER  shift, and go to state 19
-    VAR         shift, and go to state 20
-    VAL         shift, and go to state 21
-    PRINT       shift, and go to state 22
-
-    $default  reduce using rule 8 (block)
-
-    block        go to state 32
-    command      go to state 24
-    attribution  go to state 25
+    LP  shift, and go to state 39
 
 
 State 25
 
-   13 command: attribution •
+   14 command: VAR • declaration
 
-    $default  reduce using rule 13 (command)
+    IDENTIFIER  shift, and go to state 40
+
+    declaration  go to state 41
 
 
 State 26
 
-   17 attribution: IDENTIFIER ALLOC • operation
+   15 command: VAL • declaration
 
-    NUM  shift, and go to state 33
+    IDENTIFIER  shift, and go to state 40
 
-    operation  go to state 34
+    declaration  go to state 42
 
 
 State 27
 
-   16 declaration: IDENTIFIER • COMMA TYPE declarations
+   13 command: PRINT • LP TEXT RP FINALIZE
 
-    COMMA  shift, and go to state 35
+    LP  shift, and go to state 43
 
 
 State 28
 
-   11 command: VAR declaration •
-
-    $default  reduce using rule 11 (command)
-
-
-State 29
-
-   12 command: VAL declaration •
-
-    $default  reduce using rule 12 (command)
-
-
-State 30
-
-   10 command: PRINT LP • TEXT RP FINALIZE
-
-    TEXT  shift, and go to state 36
-
-
-State 31
-
-    3 program: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC •
-
-    $default  reduce using rule 3 (program)
-
-
-State 32
-
-    9 block: command block •
-
-    $default  reduce using rule 9 (block)
-
-
-State 33
-
-   18 operation: NUM •
-   19          | NUM • MATH NUM
-
-    MATH  shift, and go to state 37
-
-    $default  reduce using rule 18 (operation)
-
-
-State 34
-
-   17 attribution: IDENTIFIER ALLOC operation •
-
-    $default  reduce using rule 17 (attribution)
-
-
-State 35
-
-   16 declaration: IDENTIFIER COMMA • TYPE declarations
-
-    TYPE  shift, and go to state 38
-
-
-State 36
-
-   10 command: PRINT LP TEXT • RP FINALIZE
-
-    RP  shift, and go to state 39
-
-
-State 37
-
-   19 operation: NUM MATH • NUM
-
-    NUM  shift, and go to state 40
-
-
-State 38
-
-   16 declaration: IDENTIFIER COMMA TYPE • declarations
-
-    COMMA     shift, and go to state 41
-    FINALIZE  shift, and go to state 42
-
-    declarations  go to state 43
-
-
-State 39
-
-   10 command: PRINT LP TEXT RP • FINALIZE
+   54 breakkk: BREAK_TOKEN • FINALIZE
 
     FINALIZE  shift, and go to state 44
 
 
+State 29
+
+   55 return_ss: RETURN_TOKEN • FINALIZE
+   56          | RETURN_TOKEN • IDENTIFIER FINALIZE
+   57          | RETURN_TOKEN • TEXT FINALIZE
+   58          | RETURN_TOKEN • operation FINALIZE
+
+    IDENTIFIER  shift, and go to state 45
+    TEXT        shift, and go to state 46
+    NUM         shift, and go to state 47
+    FINALIZE    shift, and go to state 48
+
+    operation  go to state 49
+
+
+State 30
+
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block • RC
+
+    RC  shift, and go to state 50
+
+
+State 31
+
+   12 block: command • block
+
+    IDENTIFIER    shift, and go to state 22
+    IF            shift, and go to state 23
+    WHILE         shift, and go to state 24
+    VAR           shift, and go to state 25
+    VAL           shift, and go to state 26
+    PRINT         shift, and go to state 27
+    BREAK_TOKEN   shift, and go to state 28
+    RETURN_TOKEN  shift, and go to state 29
+
+    $default  reduce using rule 11 (block)
+
+    block        go to state 51
+    command      go to state 31
+    attribution  go to state 32
+    while        go to state 33
+    condition    go to state 34
+    breakkk      go to state 35
+    return_ss    go to state 36
+
+
+State 32
+
+   16 command: attribution •
+
+    $default  reduce using rule 16 (command)
+
+
+State 33
+
+   17 command: while •
+
+    $default  reduce using rule 17 (command)
+
+
+State 34
+
+   18 command: condition •
+
+    $default  reduce using rule 18 (command)
+
+
+State 35
+
+   19 command: breakkk •
+
+    $default  reduce using rule 19 (command)
+
+
+State 36
+
+   20 command: return_ss •
+
+    $default  reduce using rule 20 (command)
+
+
+State 37
+
+   28 attribution: IDENTIFIER ALLOC • $@5 novo_valor
+
+    $default  reduce using rule 27 ($@5)
+
+    $@5  go to state 52
+
+
+State 38
+
+   48 condition: IF LP • $@9 logik RP $@10 LC block RC condition_pod
+
+    $default  reduce using rule 46 ($@9)
+
+    $@9  go to state 53
+
+
+State 39
+
+   42 while: WHILE LP • $@7 logik RP $@8 LC block RC
+
+    $default  reduce using rule 40 ($@7)
+
+    $@7  go to state 54
+
+
 State 40
 
-   19 operation: NUM MATH NUM •
+   24 declaration: IDENTIFIER • $@3 COLON TYPE declarations
+   26            | IDENTIFIER • $@4 COMMA TYPE LB NUM RB declarations
 
-    $default  reduce using rule 19 (operation)
+    COMMA     reduce using rule 25 ($@4)
+    $default  reduce using rule 23 ($@3)
+
+    $@3  go to state 55
+    $@4  go to state 56
 
 
 State 41
 
-   14 declarations: COMMA • declaration
+   14 command: VAR declaration •
 
-    IDENTIFIER  shift, and go to state 27
-
-    declaration  go to state 45
+    $default  reduce using rule 14 (command)
 
 
 State 42
 
-   15 declarations: FINALIZE •
+   15 command: VAL declaration •
 
-    $default  reduce using rule 15 (declarations)
+    $default  reduce using rule 15 (command)
 
 
 State 43
 
-   16 declaration: IDENTIFIER COMMA TYPE declarations •
+   13 command: PRINT LP • TEXT RP FINALIZE
 
-    $default  reduce using rule 16 (declaration)
+    TEXT  shift, and go to state 57
 
 
 State 44
 
-   10 command: PRINT LP TEXT RP FINALIZE •
+   54 breakkk: BREAK_TOKEN FINALIZE •
 
-    $default  reduce using rule 10 (command)
+    $default  reduce using rule 54 (breakkk)
 
 
 State 45
 
-   14 declarations: COMMA declaration •
+   56 return_ss: RETURN_TOKEN IDENTIFIER • FINALIZE
 
-    $default  reduce using rule 14 (declarations)
+    FINALIZE  shift, and go to state 58
+
+
+State 46
+
+   57 return_ss: RETURN_TOKEN TEXT • FINALIZE
+
+    FINALIZE  shift, and go to state 59
+
+
+State 47
+
+   31 operation: NUM •
+
+    $default  reduce using rule 31 (operation)
+
+
+State 48
+
+   55 return_ss: RETURN_TOKEN FINALIZE •
+
+    $default  reduce using rule 55 (return_ss)
+
+
+State 49
+
+   33 operation: operation • MATH $@6 operation
+   58 return_ss: RETURN_TOKEN operation • FINALIZE
+
+    MATH      shift, and go to state 60
+    FINALIZE  shift, and go to state 61
+
+
+State 50
+
+    6 function: FUN IDENTIFIER $@1 LP declarations_parameter RP COLON TYPE $@2 LC block RC •
+
+    $default  reduce using rule 6 (function)
+
+
+State 51
+
+   12 block: command block •
+
+    $default  reduce using rule 12 (block)
+
+
+State 52
+
+   28 attribution: IDENTIFIER ALLOC $@5 • novo_valor
+
+    IDENTIFIER  shift, and go to state 62
+    TEXT        shift, and go to state 63
+    NUM         shift, and go to state 47
+    LC          shift, and go to state 64
+
+    novo_valor      go to state 65
+    operation       go to state 66
+    label_abstrato  go to state 67
+
+
+State 53
+
+   48 condition: IF LP $@9 • logik RP $@10 LC block RC condition_pod
+
+    IDENTIFIER  shift, and go to state 68
+
+    logik  go to state 69
+
+
+State 54
+
+   42 while: WHILE LP $@7 • logik RP $@8 LC block RC
+
+    IDENTIFIER  shift, and go to state 68
+
+    logik  go to state 70
+
+
+State 55
+
+   24 declaration: IDENTIFIER $@3 • COLON TYPE declarations
+
+    COLON  shift, and go to state 71
+
+
+State 56
+
+   26 declaration: IDENTIFIER $@4 • COMMA TYPE LB NUM RB declarations
+
+    COMMA  shift, and go to state 72
+
+
+State 57
+
+   13 command: PRINT LP TEXT • RP FINALIZE
+
+    RP  shift, and go to state 73
+
+
+State 58
+
+   56 return_ss: RETURN_TOKEN IDENTIFIER FINALIZE •
+
+    $default  reduce using rule 56 (return_ss)
+
+
+State 59
+
+   57 return_ss: RETURN_TOKEN TEXT FINALIZE •
+
+    $default  reduce using rule 57 (return_ss)
+
+
+State 60
+
+   33 operation: operation MATH • $@6 operation
+
+    $default  reduce using rule 32 ($@6)
+
+    $@6  go to state 74
+
+
+State 61
+
+   58 return_ss: RETURN_TOKEN operation FINALIZE •
+
+    $default  reduce using rule 58 (return_ss)
+
+
+State 62
+
+   36 label_abstrato: IDENTIFIER •
+
+    $default  reduce using rule 36 (label_abstrato)
+
+
+State 63
+
+   35 label_abstrato: TEXT •
+
+    $default  reduce using rule 35 (label_abstrato)
+
+
+State 64
+
+   34 label_abstrato: LC • item_array RC FINALIZE
+
+    IDENTIFIER  shift, and go to state 62
+    TEXT        shift, and go to state 63
+    NUM         shift, and go to state 47
+    LC          shift, and go to state 64
+
+    novo_valor      go to state 75
+    operation       go to state 66
+    label_abstrato  go to state 67
+    item_array      go to state 76
+
+
+State 65
+
+   28 attribution: IDENTIFIER ALLOC $@5 novo_valor •
+
+    $default  reduce using rule 28 (attribution)
+
+
+State 66
+
+   29 novo_valor: operation •
+   33 operation: operation • MATH $@6 operation
+
+    MATH  shift, and go to state 60
+
+    $default  reduce using rule 29 (novo_valor)
+
+
+State 67
+
+   30 novo_valor: label_abstrato •
+
+    $default  reduce using rule 30 (novo_valor)
+
+
+State 68
+
+   43 logik: IDENTIFIER • COMPARISON IDENTIFIER logic_c
+
+    COMPARISON  shift, and go to state 77
+
+
+State 69
+
+   48 condition: IF LP $@9 logik • RP $@10 LC block RC condition_pod
+
+    RP  shift, and go to state 78
+
+
+State 70
+
+   42 while: WHILE LP $@7 logik • RP $@8 LC block RC
+
+    RP  shift, and go to state 79
+
+
+State 71
+
+   24 declaration: IDENTIFIER $@3 COLON • TYPE declarations
+
+    TYPE  shift, and go to state 80
+
+
+State 72
+
+   26 declaration: IDENTIFIER $@4 COMMA • TYPE LB NUM RB declarations
+
+    TYPE  shift, and go to state 81
+
+
+State 73
+
+   13 command: PRINT LP TEXT RP • FINALIZE
+
+    FINALIZE  shift, and go to state 82
+
+
+State 74
+
+   33 operation: operation MATH $@6 • operation
+
+    NUM  shift, and go to state 47
+
+    operation  go to state 83
+
+
+State 75
+
+   37 item_array: novo_valor • item_array_final
+
+    COMMA  shift, and go to state 84
+
+    $default  reduce using rule 38 (item_array_final)
+
+    item_array_final  go to state 85
+
+
+State 76
+
+   34 label_abstrato: LC item_array • RC FINALIZE
+
+    RC  shift, and go to state 86
+
+
+State 77
+
+   43 logik: IDENTIFIER COMPARISON • IDENTIFIER logic_c
+
+    IDENTIFIER  shift, and go to state 87
+
+
+State 78
+
+   48 condition: IF LP $@9 logik RP • $@10 LC block RC condition_pod
+
+    $default  reduce using rule 47 ($@10)
+
+    $@10  go to state 88
+
+
+State 79
+
+   42 while: WHILE LP $@7 logik RP • $@8 LC block RC
+
+    $default  reduce using rule 41 ($@8)
+
+    $@8  go to state 89
+
+
+State 80
+
+   24 declaration: IDENTIFIER $@3 COLON TYPE • declarations
+
+    COMMA     shift, and go to state 90
+    FINALIZE  shift, and go to state 91
+
+    declarations  go to state 92
+
+
+State 81
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE • LB NUM RB declarations
+
+    LB  shift, and go to state 93
+
+
+State 82
+
+   13 command: PRINT LP TEXT RP FINALIZE •
+
+    $default  reduce using rule 13 (command)
+
+
+State 83
+
+   33 operation: operation • MATH $@6 operation
+   33          | operation MATH $@6 operation •
+
+    MATH  shift, and go to state 60
+
+    MATH      [reduce using rule 33 (operation)]
+    $default  reduce using rule 33 (operation)
+
+
+State 84
+
+   39 item_array_final: COMMA • item_array
+
+    IDENTIFIER  shift, and go to state 62
+    TEXT        shift, and go to state 63
+    NUM         shift, and go to state 47
+    LC          shift, and go to state 64
+
+    novo_valor      go to state 75
+    operation       go to state 66
+    label_abstrato  go to state 67
+    item_array      go to state 94
+
+
+State 85
+
+   37 item_array: novo_valor item_array_final •
+
+    $default  reduce using rule 37 (item_array)
+
+
+State 86
+
+   34 label_abstrato: LC item_array RC • FINALIZE
+
+    FINALIZE  shift, and go to state 95
+
+
+State 87
+
+   43 logik: IDENTIFIER COMPARISON IDENTIFIER • logic_c
+
+    LOGIC  shift, and go to state 96
+
+    $default  reduce using rule 44 (logic_c)
+
+    logic_c  go to state 97
+
+
+State 88
+
+   48 condition: IF LP $@9 logik RP $@10 • LC block RC condition_pod
+
+    LC  shift, and go to state 98
+
+
+State 89
+
+   42 while: WHILE LP $@7 logik RP $@8 • LC block RC
+
+    LC  shift, and go to state 99
+
+
+State 90
+
+   21 declarations: COMMA • declaration
+
+    IDENTIFIER  shift, and go to state 40
+
+    declaration  go to state 100
+
+
+State 91
+
+   22 declarations: FINALIZE •
+
+    $default  reduce using rule 22 (declarations)
+
+
+State 92
+
+   24 declaration: IDENTIFIER $@3 COLON TYPE declarations •
+
+    $default  reduce using rule 24 (declaration)
+
+
+State 93
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE LB • NUM RB declarations
+
+    NUM  shift, and go to state 101
+
+
+State 94
+
+   39 item_array_final: COMMA item_array •
+
+    $default  reduce using rule 39 (item_array_final)
+
+
+State 95
+
+   34 label_abstrato: LC item_array RC FINALIZE •
+
+    $default  reduce using rule 34 (label_abstrato)
+
+
+State 96
+
+   45 logic_c: LOGIC • logik
+
+    IDENTIFIER  shift, and go to state 68
+
+    logik  go to state 102
+
+
+State 97
+
+   43 logik: IDENTIFIER COMPARISON IDENTIFIER logic_c •
+
+    $default  reduce using rule 43 (logik)
+
+
+State 98
+
+   48 condition: IF LP $@9 logik RP $@10 LC • block RC condition_pod
+
+    IDENTIFIER    shift, and go to state 22
+    IF            shift, and go to state 23
+    WHILE         shift, and go to state 24
+    VAR           shift, and go to state 25
+    VAL           shift, and go to state 26
+    PRINT         shift, and go to state 27
+    BREAK_TOKEN   shift, and go to state 28
+    RETURN_TOKEN  shift, and go to state 29
+
+    $default  reduce using rule 11 (block)
+
+    block        go to state 103
+    command      go to state 31
+    attribution  go to state 32
+    while        go to state 33
+    condition    go to state 34
+    breakkk      go to state 35
+    return_ss    go to state 36
+
+
+State 99
+
+   42 while: WHILE LP $@7 logik RP $@8 LC • block RC
+
+    IDENTIFIER    shift, and go to state 22
+    IF            shift, and go to state 23
+    WHILE         shift, and go to state 24
+    VAR           shift, and go to state 25
+    VAL           shift, and go to state 26
+    PRINT         shift, and go to state 27
+    BREAK_TOKEN   shift, and go to state 28
+    RETURN_TOKEN  shift, and go to state 29
+
+    $default  reduce using rule 11 (block)
+
+    block        go to state 104
+    command      go to state 31
+    attribution  go to state 32
+    while        go to state 33
+    condition    go to state 34
+    breakkk      go to state 35
+    return_ss    go to state 36
+
+
+State 100
+
+   21 declarations: COMMA declaration •
+
+    $default  reduce using rule 21 (declarations)
+
+
+State 101
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE LB NUM • RB declarations
+
+    RB  shift, and go to state 105
+
+
+State 102
+
+   45 logic_c: LOGIC logik •
+
+    $default  reduce using rule 45 (logic_c)
+
+
+State 103
+
+   48 condition: IF LP $@9 logik RP $@10 LC block • RC condition_pod
+
+    RC  shift, and go to state 106
+
+
+State 104
+
+   42 while: WHILE LP $@7 logik RP $@8 LC block • RC
+
+    RC  shift, and go to state 107
+
+
+State 105
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE LB NUM RB • declarations
+
+    COMMA     shift, and go to state 90
+    FINALIZE  shift, and go to state 91
+
+    declarations  go to state 108
+
+
+State 106
+
+   48 condition: IF LP $@9 logik RP $@10 LC block RC • condition_pod
+
+    ELSE  shift, and go to state 109
+
+    $default  reduce using rule 53 (condition_final)
+
+    condition_pod    go to state 110
+    condition_final  go to state 111
+
+
+State 107
+
+   42 while: WHILE LP $@7 logik RP $@8 LC block RC •
+
+    $default  reduce using rule 42 (while)
+
+
+State 108
+
+   26 declaration: IDENTIFIER $@4 COMMA TYPE LB NUM RB declarations •
+
+    $default  reduce using rule 26 (declaration)
+
+
+State 109
+
+   51 condition_pod: ELSE • RP $@11 LC block RC $@12 condition_final
+
+    RP  shift, and go to state 112
+
+
+State 110
+
+   48 condition: IF LP $@9 logik RP $@10 LC block RC condition_pod •
+
+    $default  reduce using rule 48 (condition)
+
+
+State 111
+
+   52 condition_pod: condition_final •
+
+    $default  reduce using rule 52 (condition_pod)
+
+
+State 112
+
+   51 condition_pod: ELSE RP • $@11 LC block RC $@12 condition_final
+
+    $default  reduce using rule 49 ($@11)
+
+    $@11  go to state 113
+
+
+State 113
+
+   51 condition_pod: ELSE RP $@11 • LC block RC $@12 condition_final
+
+    LC  shift, and go to state 114
+
+
+State 114
+
+   51 condition_pod: ELSE RP $@11 LC • block RC $@12 condition_final
+
+    IDENTIFIER    shift, and go to state 22
+    IF            shift, and go to state 23
+    WHILE         shift, and go to state 24
+    VAR           shift, and go to state 25
+    VAL           shift, and go to state 26
+    PRINT         shift, and go to state 27
+    BREAK_TOKEN   shift, and go to state 28
+    RETURN_TOKEN  shift, and go to state 29
+
+    $default  reduce using rule 11 (block)
+
+    block        go to state 115
+    command      go to state 31
+    attribution  go to state 32
+    while        go to state 33
+    condition    go to state 34
+    breakkk      go to state 35
+    return_ss    go to state 36
+
+
+State 115
+
+   51 condition_pod: ELSE RP $@11 LC block • RC $@12 condition_final
+
+    RC  shift, and go to state 116
+
+
+State 116
+
+   51 condition_pod: ELSE RP $@11 LC block RC • $@12 condition_final
+
+    $default  reduce using rule 50 ($@12)
+
+    $@12  go to state 117
+
+
+State 117
+
+   51 condition_pod: ELSE RP $@11 LC block RC $@12 • condition_final
+
+    $default  reduce using rule 53 (condition_final)
+
+    condition_final  go to state 118
+
+
+State 118
+
+   51 condition_pod: ELSE RP $@11 LC block RC $@12 condition_final •
+
+    $default  reduce using rule 51 (condition_pod)

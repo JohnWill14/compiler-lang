@@ -64,35 +64,42 @@ extern int yydebug;
     LOOP = 265,                    /* LOOP  */
     TYPE = 266,                    /* TYPE  */
     TEXT = 267,                    /* TEXT  */
-    FUN = 268,                     /* FUN  */
-    VAR = 269,                     /* VAR  */
-    VAL = 270,                     /* VAL  */
-    IN = 271,                      /* IN  */
-    NUM = 272,                     /* NUM  */
-    COMPARISON = 273,              /* COMPARISON  */
-    ALLOC = 274,                   /* ALLOC  */
-    LP = 275,                      /* LP  */
-    RP = 276,                      /* RP  */
-    LC = 277,                      /* LC  */
-    RC = 278,                      /* RC  */
-    LB = 279,                      /* LB  */
-    RB = 280,                      /* RB  */
-    MATH = 281,                    /* MATH  */
-    COLON = 282,                   /* COLON  */
-    COMMA = 283,                   /* COMMA  */
-    LOGIC = 284,                   /* LOGIC  */
-    FINALIZE = 285,                /* FINALIZE  */
-    PRINT = 286                    /* PRINT  */
+    ALLOC = 268,                   /* ALLOC  */
+    NUM = 269,                     /* NUM  */
+    MATH = 270,                    /* MATH  */
+    COMPARISON = 271,              /* COMPARISON  */
+    LOGIC = 272,                   /* LOGIC  */
+    FUN = 273,                     /* FUN  */
+    VAR = 274,                     /* VAR  */
+    VAL = 275,                     /* VAL  */
+    IN = 276,                      /* IN  */
+    LP = 277,                      /* LP  */
+    RP = 278,                      /* RP  */
+    LC = 279,                      /* LC  */
+    RC = 280,                      /* RC  */
+    LB = 281,                      /* LB  */
+    RB = 282,                      /* RB  */
+    PARAMETERS = 283,              /* PARAMETERS  */
+    PARAMETER = 284,               /* PARAMETER  */
+    BLOCK = 285,                   /* BLOCK  */
+    COLON = 286,                   /* COLON  */
+    COMMA = 287,                   /* COMMA  */
+    FINALIZE = 288,                /* FINALIZE  */
+    PRINT = 289,                   /* PRINT  */
+    BREAK_TOKEN = 290,             /* BREAK_TOKEN  */
+    RETURN_TOKEN = 291,            /* RETURN_TOKEN  */
+    ALLOC_LABEL = 292,             /* ALLOC_LABEL  */
+    OPERATION_LABEL = 293          /* OPERATION_LABEL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-#line 53 "Parser.y"
+#line 58 "Parser.y"
 union semrec
 {
-#line 53 "Parser.y"
+#line 58 "Parser.y"
  /* The Semantic Records */
 
     int intval; /* Integer values */
@@ -100,10 +107,10 @@ union semrec
     char *id; /* Identifiers */
     struct lbs *lbls; /* For backpatching */
 
-#line 104 "Parser.tab.h"
+#line 111 "Parser.tab.h"
 
 };
-#line 53 "Parser.y"
+#line 58 "Parser.y"
 typedef union semrec YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

@@ -13,6 +13,7 @@ C-libraries and Token definitions
 TOKEN Definitions
 =========================================================================*/
 %option noyywrap
+%option yylineno
 
 delim	     [ \t\n]
 whites       {delim}+
@@ -26,11 +27,12 @@ alloc        "="|"+="|"-="|"/="|"*="
 arit         \+|\-|\/|\*|\*\*
 literal      \"(.+)\"
 type         "Int"|"Long"|"String"|"Float"|"Double"|"Boolean"|"Char"|"Void"
-logic        "or"|"and"|"not"|"|"|">>"|"<<"
+logic        "or"|"and"
 line_comment \/\/.*
 block_comment \/\*([^*]|\*+[^*/])*\*+\/
 print        "print"|"println"
-
+return_token "return"
+break_token  "break"
 
 
 /*=========================================================================
@@ -51,32 +53,48 @@ loop	     return (LOOP);
 def		     return (FUN); 
 var		     return (VAR); 
 val	         return (VAL); 
+{break_token}        return (BREAK_TOKEN);
+{return_token}       return (RETURN_TOKEN);
 {type}       {
                 yylval.id = (char *) strdup(yytext);
                 return (TYPE);
             }
-{logic}      return (LOGIC);
+{logic}      {
+                yylval.id = (char *) strdup(yytext);
+                return (LOGIC);
+            } 
 {num}	     {
-                sscanf(yytext, "%d", &yylval.intval);
+                //sscanf(yytext, "%d", &yylval.intval);
+                yylval.id = (char *) strdup(yytext);
                 return (NUM);
              } 
 {real}	     { 
-                sscanf(yytext, "%lf", &yylval.doubleval);
+                //sscanf(yytext, "%lf", &yylval.doubleval);
+                yylval.id = (char *) strdup(yytext);
                 return (NUM);
             } 
 {id}		 {
                 yylval.id = (char *) strdup(yytext);
                 return (IDENTIFIER);
             } 
-{comparison} return (COMPARISON); 
-{alloc}      return (ALLOC); 
+{comparison} {
+                yylval.id = (char *) strdup(yytext);
+                return (COMPARISON);
+            }
+{alloc}      {
+                yylval.id = (char *) strdup(yytext);
+                return (ALLOC); 
+            }
 "("          return (LP); 
 ")"          return (RP); 
 "{"          return (LC); 
 "}"          return (RC); 
 "["          return (LB); 
 "]"          return (RB); 
-{arit}       return (MATH);
+{arit}        {
+                yylval.id = (char *) strdup(yytext);
+                return (MATH);
+            }
 {literal}      {
                 yylval.id = (char *) strdup(yytext);
                 return (TEXT);

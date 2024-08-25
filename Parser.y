@@ -10,7 +10,12 @@ C Libraries, Symbol Table, Code Generator & other C code
 #include "SymbolTable.h" /* Symbol Table */
 #include "Tree.h" /* Stack Machine */
 #include "CG.h" /* Code Generator */
-#define YYDEBUG 1 /* For Debugging */
+#ifndef YYDEBUG  /* For Debugging */
+    #define YYDEBUG 1
+#endif
+extern int yylineno;
+extern char* yytext;
+
 int errors; /* Error Count */
 
 int yylex(void);
@@ -35,7 +40,7 @@ void add_identify ( char *sym_name ){
 If identifier is defined, generate code
 -------------------------------------------------------------------------*/
 
-void context_check( enum code_ops operation, char *sym_name ){ 
+void context_check(char *sym_name ){ 
     symrec *identifier;
     identifier = getsym( sym_name );
     if ( identifier == 0 ){ 
@@ -69,9 +74,15 @@ TOKENS
 %token <lbls> IF ELSE FOR WHILE LOOP
 %token <id> TYPE 
 %token <id> TEXT
-%token FUN VAR VAL IN NUM 
-%token COMPARISON ALLOC LP RP LC RC LB RB MATH 
-%token COLON COMMA LOGIC FINALIZE PRINT
+%token <id> ALLOC
+%token <id> NUM
+%token <id> MATH
+%token <id> COMPARISON
+%token <id> LOGIC
+%token FUN VAR VAL IN  
+%token   LP RP LC RC LB RB PARAMETERS PARAMETER BLOCK
+%token COLON COMMA  FINALIZE PRINT BREAK_TOKEN RETURN_TOKEN 
+            ALLOC_LABEL  OPERATION_LABEL
 /*=========================================================================
 OPERATOR PRECEDENCE
 =========================================================================*/
@@ -82,10 +93,17 @@ OPERATOR PRECEDENCE
 GRAMMAR RULES for the Simple language
 =========================================================================*/
 %%
-program : FUN
+program:  function code
+;
+code: 
+       /* empty */
+       | program
+
+;
+function: FUN
             IDENTIFIER{
                     add_identify($2);
-                    create_no($2, DEF);
+                    create_no($2, FUN);
                     create_no(NULL, PARAMETERS);
                 }
             LP
@@ -94,24 +112,24 @@ program : FUN
             COLON
             TYPE{ 
                     revert_no();
-                    create_no($8, PRIMITIVE);
+                    create_no($8, TYPE);
                     revert_no();
                     create_no(NULL, BLOCK);
                 }
             LC 
              block 
             RC{
-                revert_no();
+                finalize_tree();
             }
 ;
 declarations_parameter : /* empty */
-            | IDENTIFIER COLON TYPE declaration_parameter { 
-                                                  add_identify( $1 ); 
-                                                  create_no($1, PARAMETER);
-                                                  create_no($3, PRIMITIVE);
-                                                  revert_no();
-                                                  revert_no();
-                                                }
+            | IDENTIFIER COLON TYPE { 
+                            add_identify( $1 ); 
+                            create_no($1, PARAMETER);
+                            create_no($3, TYPE);
+                            revert_no();
+                            revert_no();
+                        } declaration_parameter 
             
 ;
 declaration_parameter: /* empty */
@@ -121,26 +139,164 @@ block : /* empty */ {revert_no();}
             | command block
 ;
 command : PRINT LP TEXT RP FINALIZE {
-                            create_no("print", PRINT_FUN);
-                            create_no($3, PRIMITIVE);
+                            create_no("print", PRINT);
+                            create_no($3, TEXT);
                             revert_no();
                             revert_no();
                     }
-        |VAR declaration
-        |VAL declaration
-        |attribution
+        |VAR{
+            create_no(NULL, VAR);
+        } declaration 
+        |VAL {
+            create_no(NULL, VAL);
+        } declaration 
+        |attribution 
+        | while 
+        | condition  
+        | breakkk{
+            create_no(NULL, BREAK_TOKEN);
+        }
+        | return_ss{
+            create_no(NULL, RETURN_TOKEN);
+        }
 ;
 declarations:
             COMMA declaration  
-           | FINALIZE
+           | FINALIZE{
+            revert_no();
+           }
 ;
-declaration: IDENTIFIER COMMA TYPE declarations
+declaration: IDENTIFIER COLON TYPE {
+                add_identify($1);
+                create_no($1, IDENTIFIER);
+                create_no($3, TYPE);
+                revert_no();
+                revert_no();
+            } declarations
 
 ;
-attribution: IDENTIFIER ALLOC operation
+attribution: IDENTIFIER ALLOC {
+            create_no(NULL, ALLOC_LABEL);
+            context_check($1);
+
+            create_no($1, IDENTIFIER);
+            revert_no();
+            create_no($2, ALLOC);
+            revert_no();
+            create_no(NULL, OPERATION_LABEL);
+        }
+            novo_valor 
+             
 ;
-operation: NUM |
-           NUM MATH NUM
+novo_valor: operation 
+            |label_abstrato
+;
+operation: NUM FINALIZE{
+            create_no($1, NUM);
+            revert_no();
+        }
+        | NUM {
+            create_no($1, NUM);
+            revert_no();
+        } operation
+        | MATH{
+                create_no($1, MATH);
+                revert_no();
+        } operation
+;
+label_abstrato: TEXT
+                | IDENTIFIER
+;
+while: WHILE {
+            create_no(NULL, WHILE);
+        }
+        LP
+            logik
+        RP
+        LC {
+            create_no(NULL, BLOCK);
+        }
+             block 
+        RC{
+            {revert_no();}
+        }
+
+;
+logik: IDENTIFIER COMPARISON  IDENTIFIER logic_c {
+            context_check($1);
+            context_check($3);
+
+            create_no($1, IDENTIFIER);
+            revert_no();
+            create_no($2, COMPARISON);
+            revert_no();
+            create_no($3, IDENTIFIER);
+            revert_no();
+        }
+        | NUM COMPARISON  NUM logic_c {
+
+            create_no($1, NUM);
+            revert_no();
+            create_no($2, COMPARISON);
+            revert_no();
+            create_no($3, NUM);
+            revert_no();
+        }
+;
+logic_c: /* empty */
+    | LOGIC {
+            create_no($1, LOGIC);
+            revert_no();
+    } logik
+;
+condition: IF {
+            create_no(NULL, IF);
+        }
+        LP
+            logik
+        RP{
+            create_no(NULL, BLOCK);
+        }
+        LC 
+             block 
+        RC
+        condition_pod
+
+;
+condition_pod: /* empty */ {revert_no();}
+        | ELSE{
+            create_no(NULL, ELSE);
+            create_no(NULL, BLOCK);
+        }
+        LC 
+             block 
+        RC{
+            revert_no();
+        }
+;
+breakkk: BREAK_TOKEN {
+            create_no(NULL, BREAK_TOKEN);
+            revert_no();
+        } FINALIZE
+;
+return_ss: RETURN_TOKEN FINALIZE{
+            create_no(NULL, RETURN_TOKEN);
+            revert_no();
+        }
+        | RETURN_TOKEN IDENTIFIER FINALIZE{
+            create_no(NULL, RETURN_TOKEN);
+            revert_no();
+            create_no($2, IDENTIFIER);
+            revert_no();
+        }
+        | RETURN_TOKEN TEXT FINALIZE{
+            create_no($2, TEXT);
+            revert_no();
+        }
+        | RETURN_TOKEN{
+            create_no(NULL, RETURN_TOKEN);
+            revert_no();
+        } operation FINALIZE
 ;
 
 %%
@@ -153,9 +309,9 @@ void main( int argc, char *argv[] ){
     yyin = fopen( argv[0], "r" );
     errors = 0;
     yyparse ();
-    printf ( "Parse Completed\n" );
     if ( errors == 0 ){ 
         print_code ();
+        printf ( "Sucessfull Parse Completed!!!\n" );
     }
 }
 /*=========================================================================
@@ -164,6 +320,6 @@ YYERROR
 int yyerror ( char *s ) /* Called by yyparse on error */
 {
     errors++;
-    printf("%s\n", s);
+    printf("%s - not expected \"%s\" line %d\n", s, yylval, yylineno);
 }
 /**************************** End Grammar File ***************************/
