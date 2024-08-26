@@ -1755,7 +1755,7 @@ yyreduce:
   case 74: /* return_ss: RETURN_TOKEN $@26 return_type FINALIZE  */
 #line 384 "Parser.y"
                 {
-            errors+= check_return();
+            list_add_returnsList(yylineno);
             revert_no();
         }
 #line 1762 "Parser.tab.c"
@@ -2072,7 +2072,10 @@ void main( int argc, char *argv[] ){
     errors = 0;
     yyparse ();
     errors += valid();
+    errors += check_return();
     errors += check_returns_f();
+
+    
     if ( errors == 0 ){ 
         showFuncTable();
         showVarTable();

@@ -15,6 +15,8 @@ List* trees_history;
 
 Tree* current_tree;
 
+List* returnsList;
+
 int nivel_block_current = 0;
 char* function_current = NULL;
 
@@ -25,6 +27,11 @@ Tree*  init_no(char* label, int command){
   if(trees == NULL){
     trees = list_create();
   }
+
+  if(returnsList == NULL){
+    returnsList = list_create();
+  }
+
   if(trees_history == NULL){
     trees_history = list_create();
   }
@@ -104,45 +111,73 @@ void finalize_tree(){
 
 int check_return();
 
+struct return_info{
+  Tree* tree;
+  int line;
+  int nivel;
+  char* function;
+};
+
+
+typedef struct return_info return_info;
+
+
+void list_add_returnsList(int line){
+
+  return_info *ptr;
+
+  ptr = (return_info *) malloc (sizeof(return_info));
+
+  ptr->tree = current_tree;
+  ptr-> line =line;
+  ptr->nivel = nivel_block_current;
+  ptr->function = (char *) malloc (strlen(function_current)+1);
+  strcpy (ptr->function,function_current);
+
+  list_add(returnsList, ptr);
+}
 
 int check_return(){
-       Tree* tree = list_getItem(current_tree->neighbors,0)->value;
+  int ans = 0;
+   list_forEach(t, returnsList) {
+        return_info* ptr = getValue(t, return_info *);
+        Tree *tree = ptr->tree;
        
-       symfunc * t = getsymfunc (function_current);
+        symfunc * t = getsymfunc (ptr->function);
+        Tree* r = ((Tree*)(list_getItem(tree->neighbors, 0)->value));
 
-      if(tree->command == IDENTIFIER){
-        symvar * s = getsymVar (tree->label, nivel_block_current, function_current);
+        if(r->command == IDENTIFIER){
+          symvar * s = getsymVar (r->label, nivel_block_current, function_current);
 
-        if(s != NULL){
-          if(strcmp(s->type, t->return_type)==0){
-            return 0;
-          }else{
-            printf("Error type return in %s\n", function_current);
-            return 1;
+          if(s != NULL){
+            if(strcmp(s->type, t->return_type)!=0){
+              printf("Error type return in %s. line %d\n", function_current, ptr->line);
+              ans += 1;
+            }
           }
+
+        } else if(r->command == TEXT){
+            if(strcmp(t->return_type, "String")!=0){
+              printf("Error type return in %s. line %d\n", function_current, ptr->line);
+              ans += 1;
+            }
+        }else if(r->command == CALL_FUNCTION){
+           symfunc* f = getsymfunc(r->label);
+
+            if(f != NULL){
+              if(strcmp(f->return_type, t->return_type)!=0){
+                 printf("Error type return in %s. line %d\n", function_current, ptr->line);
+                ans += 1;
+              }
+            }else{
+              ans +=1;
+              printf("function not found line %d\n", ptr->line );
+            }
         }
 
-        symfunc* f = getsymfunc(tree->label);
-
-        if(f != NULL){
-          if(strcmp(f->return_type, t->return_type)==0){
-            return 0;
-          }else{
-            printf("Error type return in %s\n", function_current);
-            return 1;
-          }
-        }
-
-      } else if(tree->command == TEXT){
-          if(strcmp(t->return_type, "String")==0){
-            return 0;
-          }else{
-            printf("Error type return in %s\n", function_current);
-            return 1;
-          }
-      }
-
-    return 1;
+       
+   }
+   return ans;
 }
 
 int check_return_f(Tree* tree){

@@ -1,4 +1,11 @@
-def main(name: Int, name2: Int, name3:Long): Void{
+def test(): String{
+    var num:Double;
+    num = 3;
+    return "%{num}";
+}
+
+
+def main(name: Int, name2: Int, name3:Long): String{
     val x:Int =  test() + 5 + name;
 
     var y:Int;
@@ -6,12 +13,11 @@ def main(name: Int, name2: Int, name3:Long): Void{
     y =  test() + 5 + "%{name}";
 
     if(test()==4){
+        while(name==3){
 
+        }
     }
+
+    return test();
 }
 
-def test():String{
-    var num:Double;
-    num = 3;
-    return "%{num}";
-}

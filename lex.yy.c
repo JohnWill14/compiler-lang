@@ -876,180 +876,251 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 45 "scanner.l"
-return (IF); 
+{
+              puts("<IF,_>");
+              return (IF);
+            } 
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 46 "scanner.l"
-return (ELSE); 
+#line 49 "scanner.l"
+{
+                puts("<ELSE,_>");
+                return (ELSE);
+             }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 47 "scanner.l"
-return (FOR);
+#line 53 "scanner.l"
+{
+                puts("<FOR,_>");
+                return (FOR);
+            }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 48 "scanner.l"
-return (IN); 
+#line 57 "scanner.l"
+{
+                puts("<IN,_>");
+                return (IN);
+            }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 49 "scanner.l"
-return (WHILE); 
+#line 62 "scanner.l"
+{
+                puts("<WHILE,_>");
+                return (WHILE);
+            }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 50 "scanner.l"
-return (LOOP);
+#line 66 "scanner.l"
+{
+            puts("<LOOP,_>");
+             return (LOOP);
+            }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 51 "scanner.l"
-return (FUN); 
+#line 70 "scanner.l"
+{
+                puts("<FUN,def>");
+                return (FUN);
+            } 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 52 "scanner.l"
-return (VAR); 
+#line 74 "scanner.l"
+{
+             puts("<VAR,var>");
+             return (VAR);
+            }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 53 "scanner.l"
-return (VAL); 
+#line 78 "scanner.l"
+{
+                 puts("<VAL,val>");
+                return (VAL);
+            } 
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 54 "scanner.l"
-return (BREAK_TOKEN);
+#line 82 "scanner.l"
+{
+                        puts("<BREAK_TOKEN,break>");
+                        return (BREAK_TOKEN);
+                    }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 55 "scanner.l"
-return (RETURN_TOKEN);
+#line 86 "scanner.l"
+{
+                        puts("<RETURN_TOKEN,return>");
+                        return (RETURN_TOKEN);
+                    }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 56 "scanner.l"
+#line 90 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<TYPE,%s>", yytext);
                 return (TYPE);
             }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 60 "scanner.l"
+#line 95 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<LOGIC,%s>", yytext);
                 return (LOGIC);
             } 
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 64 "scanner.l"
+#line 100 "scanner.l"
 {
                 //sscanf(yytext, "%d", &yylval.intval);
                 yylval.id = (char *) strdup(yytext);
+                printf("<NUM,%s>", yytext);
                 return (NUM);
              } 
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 69 "scanner.l"
+#line 106 "scanner.l"
 { 
                 //sscanf(yytext, "%lf", &yylval.doubleval);
                 yylval.id = (char *) strdup(yytext);
+                printf("<NUM,%s>", yytext);
                 return (NUM);
             } 
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 74 "scanner.l"
+#line 112 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<IDENTIFIER,%s>", yytext);
                 return (IDENTIFIER);
             } 
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 78 "scanner.l"
+#line 117 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<COMPARISON,%s>", yytext);
                 return (COMPARISON);
             }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 82 "scanner.l"
+#line 122 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<ALLOC,%s>", yytext);
                 return (ALLOC); 
             }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 86 "scanner.l"
-return (LP); 
+#line 127 "scanner.l"
+{
+                puts("<LP,(>");
+                return (LP);
+            } 
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 87 "scanner.l"
-return (RP); 
+#line 131 "scanner.l"
+{
+                puts("<RP,)>");
+                return (RP);
+            } 
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 88 "scanner.l"
-return (LC); 
+#line 135 "scanner.l"
+{
+                puts("<LC,{>");
+                return (LC);
+            } 
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 89 "scanner.l"
-return (RC); 
+#line 139 "scanner.l"
+{
+                puts("<RC,}>");
+                return (RC);
+            } 
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 90 "scanner.l"
-return (LB); 
+#line 143 "scanner.l"
+{
+                puts("<LB,[>");
+                return (LB);
+            }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 91 "scanner.l"
-return (RB); 
+#line 147 "scanner.l"
+{
+
+                puts("<LB,]>");
+                return (RB);
+            } 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 92 "scanner.l"
+#line 152 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<MATH,%s>", yytext);
                 return (MATH);
             }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 96 "scanner.l"
+#line 157 "scanner.l"
 {
                 yylval.id = (char *) strdup(yytext);
+                printf("<TEXT,%s>", yytext);
                 return (TEXT);
             } 
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 100 "scanner.l"
-return (COLON);
+#line 162 "scanner.l"
+{
+                puts("<COLON,:>");
+                return (COLON);
+            }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 101 "scanner.l"
-return (COMMA);
+#line 166 "scanner.l"
+{
+                puts("<COLON,,>");
+                return (COMMA);
+            }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 102 "scanner.l"
-return (FINALIZE);
+#line 170 "scanner.l"
+{
+
+                puts("<FINALIZE,;>");
+                return (FINALIZE);
+            }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 103 "scanner.l"
+#line 175 "scanner.l"
 {
                 printf("Term not identified\n, %s \nthere is an invalid term detected\n", yytext); 
                 exit(1);    
@@ -1057,10 +1128,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 107 "scanner.l"
+#line 179 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1063 "lex.yy.c"
+#line 1134 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2077,6 +2148,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 107 "scanner.l"
+#line 179 "scanner.l"
 
 /************************** End Scanner File *****************************/
