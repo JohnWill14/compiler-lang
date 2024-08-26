@@ -1,0 +1,16 @@
+def main(): String{
+    var num:Double;
+   
+    while(1==8){
+        break;
+    }
+
+
+    return "%{num}";
+}
+
+def t():Double{
+    val x:Double = 4;
+    return x;
+}
+

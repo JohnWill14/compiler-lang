@@ -36,7 +36,7 @@ char* getCode(int code){
             return "declaracao de constantes";
         break;
         case IDENTIFIER:
-            return "variavel, funcao ou algum outro trem";
+            return "variavel, funcao...";
         break;
         case ALLOC_LABEL:
             return "inicio de atribuicao de valored";
@@ -48,7 +48,7 @@ char* getCode(int code){
             return "inicio de uma operacao";
         break;
         case MATH:
-            return "matematyica";
+            return "operador aritmetico";
         break;
         case NUM:
             return "numero";
@@ -78,9 +78,12 @@ char* getCode(int code){
         case RETURN_TOKEN:
             return "return";
         break;
+        case CALL_FUNCTION:
+            return "chamada de método";
+        break;
 
         default:
-            return "faz o L";
+            return "não registrado :(";
         break;
 
                

@@ -1,0 +1,14 @@
+// vai dar erro pq nao tem main
+def test(): String{
+    var num:Double;
+    
+    while(num == 5){
+        if(5>4){
+            println("Hello World!!!");
+            print("Hi!!!");
+        }
+    }
+
+    return "num";
+}
+

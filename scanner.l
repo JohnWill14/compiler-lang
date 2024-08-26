@@ -1,17 +1,9 @@
-/***************************************************************************
-Scanner for the ELFR language
-***************************************************************************/
 %{
-/*=========================================================================
-C-libraries and Token definitions
-=========================================================================*/
 #include <string.h> /* for strdup */
 #include <stdlib.h> /* for atoi */
 #include "Parser.tab.h" /* for token definitions and yylval */
 %}
-/*=========================================================================
-TOKEN Definitions
-=========================================================================*/
+
 %option noyywrap
 %option yylineno
 
@@ -38,9 +30,9 @@ break_token  "break"
 REGULAR EXPRESSIONS defining the tokens for the Simple language
 =========================================================================*/
 %%
-{whites}        ; // no action and no return
-{line_comment}  ; // no action and no return
-{block_comment}  ; // no action and no return
+{whites}        ; 
+{line_comment}  ; 
+{block_comment}  ; 
 
 if		     {
               puts("<IF,_>");
@@ -89,87 +81,87 @@ val	        {
                     }
 {type}       {
                 yylval.id = (char *) strdup(yytext);
-                printf("<TYPE,%s>", yytext);
+                printf("<TYPE,%s>\n", yytext);
                 return (TYPE);
             }
 {logic}      {
                 yylval.id = (char *) strdup(yytext);
-                printf("<LOGIC,%s>", yytext);
+                printf("<LOGIC,%s>\n", yytext);
                 return (LOGIC);
             } 
 {num}	     {
                 //sscanf(yytext, "%d", &yylval.intval);
                 yylval.id = (char *) strdup(yytext);
-                printf("<NUM,%s>", yytext);
+                printf("<NUM,%s>\n", yytext);
                 return (NUM);
              } 
 {real}	     { 
                 //sscanf(yytext, "%lf", &yylval.doubleval);
                 yylval.id = (char *) strdup(yytext);
-                printf("<NUM,%s>", yytext);
+                printf("<NUM,%s>\n", yytext);
                 return (NUM);
             } 
 {id}		 {
                 yylval.id = (char *) strdup(yytext);
-                printf("<IDENTIFIER,%s>", yytext);
+                printf("<IDENTIFIER,%s>\n", yytext);
                 return (IDENTIFIER);
             } 
 {comparison} {
                 yylval.id = (char *) strdup(yytext);
-                printf("<COMPARISON,%s>", yytext);
+                printf("<COMPARISON,%s>\n", yytext);
                 return (COMPARISON);
             }
 {alloc}      {
                 yylval.id = (char *) strdup(yytext);
-                printf("<ALLOC,%s>", yytext);
+                printf("<ALLOC,%s>\n", yytext);
                 return (ALLOC); 
             }
 "("          {
-                puts("<LP,(>");
+                puts("<LP,(>\n");
                 return (LP);
             } 
 ")"          {
-                puts("<RP,)>");
+                puts("<RP,)>\n");
                 return (RP);
             } 
 "{"          {
-                puts("<LC,{>");
+                puts("<LC,{>\n");
                 return (LC);
             } 
 "}"          {
-                puts("<RC,}>");
+                puts("<RC,}>\n");
                 return (RC);
             } 
 "["          {
-                puts("<LB,[>");
+                puts("<LB,[>\n");
                 return (LB);
             }
 "]"          {
 
-                puts("<LB,]>");
+                puts("<LB,]>\n");
                 return (RB);
             } 
 {arit}        {
                 yylval.id = (char *) strdup(yytext);
-                printf("<MATH,%s>", yytext);
+                printf("<MATH,%s>\n", yytext);
                 return (MATH);
             }
 {literal}      {
                 yylval.id = (char *) strdup(yytext);
-                printf("<TEXT,%s>", yytext);
+                printf("<TEXT,%s>\n", yytext);
                 return (TEXT);
             } 
 ":"          {
-                puts("<COLON,:>");
+                puts("<COLON,:>\n");
                 return (COLON);
             }
 ","          {
-                puts("<COLON,,>");
+                puts("<COLON,,>\n");
                 return (COMMA);
             }
 ";"          {
 
-                puts("<FINALIZE,;>");
+                puts("<FINALIZE,;>\n");
                 return (FINALIZE);
             }
 .            {
@@ -177,4 +169,3 @@ val	        {
                 exit(1);    
             }
 %%
-/************************** End Scanner File *****************************/

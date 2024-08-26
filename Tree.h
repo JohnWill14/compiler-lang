@@ -147,18 +147,18 @@ int check_return(){
         Tree* r = ((Tree*)(list_getItem(tree->neighbors, 0)->value));
 
         if(r->command == IDENTIFIER){
-          symvar * s = getsymVar (r->label, nivel_block_current, function_current);
-
+          symvar * s = getsymVar (r->label, ptr->nivel, ptr->function);
+  
           if(s != NULL){
             if(strcmp(s->type, t->return_type)!=0){
-              printf("Error type return in %s. line %d\n", function_current, ptr->line);
+              printf("Error type return in %s. line %d\n", ptr->function, ptr->line);
               ans += 1;
             }
           }
 
         } else if(r->command == TEXT){
             if(strcmp(t->return_type, "String")!=0){
-              printf("Error type return in %s. line %d\n", function_current, ptr->line);
+              printf("Error type return in %s. line %d\n", ptr->function, ptr->line);
               ans += 1;
             }
         }else if(r->command == CALL_FUNCTION){
@@ -166,7 +166,7 @@ int check_return(){
 
             if(f != NULL){
               if(strcmp(f->return_type, t->return_type)!=0){
-                 printf("Error type return in %s. line %d\n", function_current, ptr->line);
+                 printf("Error type return in %s. line %d\n", ptr->function, ptr->line);
                 ans += 1;
               }
             }else{
