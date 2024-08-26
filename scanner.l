@@ -30,7 +30,6 @@ type         "Int"|"Long"|"String"|"Float"|"Double"|"Boolean"|"Char"|"Void"
 logic        "or"|"and"
 line_comment \/\/.*
 block_comment \/\*([^*]|\*+[^*/])*\*+\/
-print        "print"|"println"
 return_token "return"
 break_token  "break"
 
@@ -43,7 +42,6 @@ REGULAR EXPRESSIONS defining the tokens for the Simple language
 {line_comment}  ; // no action and no return
 {block_comment}  ; // no action and no return
 
-{print}      return (PRINT); 
 if		     return (IF); 
 else		 return (ELSE); 
 for		     return (FOR);

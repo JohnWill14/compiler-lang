@@ -1,49 +1,100 @@
-%{/*************************************************************************
-Compiler for the Simple language
-***************************************************************************/
-/*=========================================================================
-C Libraries, Symbol Table, Code Generator & other C code
-=========================================================================*/
-#include <stdio.h> /* For I/O */
-#include <stdlib.h> /* For malloc here and in symbol table */
-#include <string.h> /* For strcmp in symbol table */
-#include "SymbolTable.h" /* Symbol Table */
-#include "Tree.h" /* Stack Machine */
-#include "CG.h" /* Code Generator */
-#ifndef YYDEBUG  /* For Debugging */
+%{
+#include <stdio.h> 
+#include <stdlib.h>
+#include <string.h> 
+#include "SymbolTable.h" 
+#include "Tree.h"
+#include "Print_tree.h" 
+#ifndef YYDEBUG  
     #define YYDEBUG 1
 #endif
 extern int yylineno;
 extern char* yytext;
 
-int errors; /* Error Count */
+int errors; 
 
 int yylex(void);
 int yyerror(char* s);
 
 
-/*-------------------------------------------------------------------------
-Install identifier & check if previously defined.
--------------------------------------------------------------------------*/
-void add_identify ( char *sym_name ){
-    symrec *s;
-    s = getsym (sym_name);
-    if (s == 0)
-        s = putsym (sym_name);
+//SymbolTable
+void add_identify_var(char *sym_name, int nivel, char* name_function, bool constante, char* type){
+    symvar *s;
+    s = getsymVar(sym_name, nivel, name_function);
+    if (s == NULL)
+        s = putsymVar(sym_name, nivel, name_function, constante, type);
     else { 
         errors++;
-        printf( "%s is already defined\n", sym_name );
+        printf( "variable %s is already defined in %s\n", sym_name, s->function);
     }
 }
 
-/*-------------------------------------------------------------------------
-If identifier is defined, generate code
--------------------------------------------------------------------------*/
+void check_var(char *sym_name, int nivel, char* name_function){
+    symvar *s;
+    s = getsymVar(sym_name, nivel, name_function);
+    if (s == NULL){ 
+        errors++;
+        printf( "variable %s not is defined. line %d\n", sym_name, yylineno);
+    }
+}
 
-void context_check(char *sym_name ){ 
-    symrec *identifier;
-    identifier = getsym( sym_name );
-    if ( identifier == 0 ){ 
+
+void add_identify_func ( Tree* function ){
+    symfunc *s;
+    s = getsymfunc (function->label);
+    if (s == NULL){
+        Node* no = list_getItem(function->neighbors, 0);
+        Tree* lista_de_parametros = no->value;
+        int tam_p = list_get_size(lista_de_parametros->neighbors);
+        char** name_array = (char **) malloc(sizeof(char *) * tam_p);
+        int count = 0;
+
+        list_forEach(non, lista_de_parametros->neighbors){
+            Tree* tno = (Tree*)non->value;
+            Node* no_type = list_getItem(tno->neighbors, 0);
+            Tree* tno_type = (Tree*) no_type->value;
+
+            name_array[count] = (char *) malloc (strlen(tno_type->label)+1);
+            strcpy (name_array[count],tno_type->label);
+
+            add_identify_var(tno->label, 1, function->label, 0, tno_type->label);
+
+            count++;
+        }
+
+
+        Node* no_type = list_getItem(function->neighbors, 1);
+        Tree* tno_type = (Tree*) no_type->value;
+        char* type = (char *) malloc (strlen(tno_type->label)+1);
+        strcpy (type,tno_type->label);
+
+        s = putsymfunc (function->label, name_array, tam_p, type );
+    } else { 
+        errors++;
+        printf( "function %s is already defined\n", function->label );
+    }
+}
+
+void add_call ( Tree* call){
+
+    int tam_p = list_get_size(call->neighbors);
+    char** name_array = (char **) malloc(sizeof(char *) * tam_p);
+    int count = 0;
+    list_forEach(non, call->neighbors){
+
+        Tree* tno = (Tree*)non->value;
+        name_array[count] = (char *) malloc (strlen(tno->label)+1);
+        strcpy (name_array[count],tno->label);
+        count++;
+    }
+
+     putsymCall (yylineno, call->label, function_current, name_array, tam_p, nivel_block_current);
+}
+
+void context_check_func(char *sym_name ){ 
+    symfunc *identifier;
+    identifier = getsymfunc( sym_name );
+    if ( identifier == NULL){ 
         errors++;
         printf( "%s", sym_name );
         printf( "%s\n", " is an undeclared identifier" );
@@ -52,15 +103,12 @@ void context_check(char *sym_name ){
 
 %}
 
-/*=========================================================================
-SEMANTIC RECORDS
-=========================================================================*/
-%union semrec{ /* The Semantic Records */
 
-    int intval; /* Integer values */
-    int doubleval; /* Double values */
-    char *id; /* Identifiers */
-    struct lbs *lbls; /* For backpatching */
+%union semrec{ 
+
+    int intval; 
+    int doubleval; 
+    char *id;
 }
 
 /*=========================================================================
@@ -82,16 +130,11 @@ TOKENS
 %token FUN VAR VAL IN  
 %token   LP RP LC RC LB RB PARAMETERS PARAMETER BLOCK
 %token COLON COMMA  FINALIZE PRINT BREAK_TOKEN RETURN_TOKEN 
-            ALLOC_LABEL  OPERATION_LABEL
-/*=========================================================================
-OPERATOR PRECEDENCE
-=========================================================================*/
-%left '-' '+'
+            ALLOC_LABEL  OPERATION_LABEL CALL_FUNCTION CALL_PARAM
+
+%left '+' '-'
 %left '*' '/'
-%right '^'
-/*=========================================================================
-GRAMMAR RULES for the Simple language
-=========================================================================*/
+
 %%
 program:  function code
 ;
@@ -102,7 +145,6 @@ code:
 ;
 function: FUN
             IDENTIFIER{
-                    add_identify($2);
                     create_no($2, FUN);
                     create_no(NULL, PARAMETERS);
                 }
@@ -114,6 +156,7 @@ function: FUN
                     revert_no();
                     create_no($8, TYPE);
                     revert_no();
+                    add_identify_func(current_tree);
                     create_no(NULL, BLOCK);
                 }
             LC 
@@ -124,7 +167,6 @@ function: FUN
 ;
 declarations_parameter : /* empty */
             | IDENTIFIER COLON TYPE { 
-                            add_identify( $1 ); 
                             create_no($1, PARAMETER);
                             create_no($3, TYPE);
                             revert_no();
@@ -138,27 +180,26 @@ declaration_parameter: /* empty */
 block : /* empty */ {revert_no();}
             | command block
 ;
-command : PRINT LP TEXT RP FINALIZE {
-                            create_no("print", PRINT);
-                            create_no($3, TEXT);
-                            revert_no();
-                            revert_no();
-                    }
-        |VAR{
+command : VAR{
             create_no(NULL, VAR);
         } declaration 
         |VAL {
             create_no(NULL, VAL);
-        } declaration 
-        |attribution 
+        } declaration_val {
+                revert_no();
+                revert_no();
+        }
+
+        |attribution {
+            revert_no();
+        }
         | while 
         | condition  
         | breakkk{
             create_no(NULL, BREAK_TOKEN);
         }
-        | return_ss{
-            create_no(NULL, RETURN_TOKEN);
-        }
+        | return_ss
+        | call_function
 ;
 declarations:
             COMMA declaration  
@@ -167,17 +208,50 @@ declarations:
            }
 ;
 declaration: IDENTIFIER COLON TYPE {
-                add_identify($1);
+                add_identify_var($1, nivel_block_current, function_current, constante_current, $3);
+                    
                 create_no($1, IDENTIFIER);
                 create_no($3, TYPE);
                 revert_no();
                 revert_no();
             } declarations
+             
 
+;
+declaration_val:IDENTIFIER COLON TYPE {
+                add_identify_var($1, nivel_block_current, function_current, constante_current, $3);
+                    
+                create_no($1, IDENTIFIER);
+                create_no($3, TYPE);
+                revert_no();
+                revert_no();
+            } ALLOC {
+                create_no(NULL, ALLOC_LABEL);
+                check_var($1, nivel_block_current, function_current);
+            
+                create_no($1, IDENTIFIER);
+                revert_no();
+                create_no($5, ALLOC);
+                revert_no();
+                create_no(NULL, OPERATION_LABEL);
+            }
+            novo_valor
 ;
 attribution: IDENTIFIER ALLOC {
             create_no(NULL, ALLOC_LABEL);
-            context_check($1);
+            check_var($1, nivel_block_current, function_current);
+            errors += check_var_is_Constant($1, nivel_block_current, function_current);
+
+            create_no($1, IDENTIFIER);
+            revert_no();
+            create_no($2, ALLOC);
+            revert_no();
+            create_no(NULL, OPERATION_LABEL);
+        }
+            novo_valor 
+        | IDENTIFIER ALLOC LP {
+            create_no(NULL, ALLOC_LABEL);
+            check_var($1, nivel_block_current, function_current);
 
             create_no($1, IDENTIFIER);
             revert_no();
@@ -191,21 +265,37 @@ attribution: IDENTIFIER ALLOC {
 novo_valor: operation 
             |label_abstrato
 ;
-operation: NUM FINALIZE{
-            create_no($1, NUM);
+operation: FINALIZE{
             revert_no();
-        }
+        } 
         | NUM {
             create_no($1, NUM);
             revert_no();
-        } operation
+        } novo_valor
         | MATH{
                 create_no($1, MATH);
                 revert_no();
-        } operation
+        } novo_valor
+        | LP novo_valor RP novo_valor
+        
 ;
-label_abstrato: TEXT
-                | IDENTIFIER
+label_abstrato: TEXT{
+                    errors += checkString($1, nivel_block_current, function_current);
+                    create_no($1, TEXT);
+                    revert_no();
+                } novo_valor
+                | IDENTIFIER{
+                    create_no($1, CALL_FUNCTION);
+                } LP parameter_func RP {
+                    add_call(current_tree);
+                    revert_no();            
+                } novo_valor
+                | IDENTIFIER{
+
+                    check_var($1, nivel_block_current, function_current);
+                    create_no($1, IDENTIFIER);
+                    revert_no();
+                } novo_valor
 ;
 while: WHILE {
             create_no(NULL, WHILE);
@@ -222,26 +312,32 @@ while: WHILE {
         }
 
 ;
-logik: IDENTIFIER COMPARISON  IDENTIFIER logic_c {
-            context_check($1);
-            context_check($3);
-
-            create_no($1, IDENTIFIER);
-            revert_no();
+logik: comparator COMPARISON{
             create_no($2, COMPARISON);
             revert_no();
-            create_no($3, IDENTIFIER);
-            revert_no();
-        }
-        | NUM COMPARISON  NUM logic_c {
-
-            create_no($1, NUM);
-            revert_no();
-            create_no($2, COMPARISON);
-            revert_no();
-            create_no($3, NUM);
-            revert_no();
-        }
+        }  comparator logic_c 
+        
+;
+ comparator: NUM{
+                 create_no($1, NUM);
+                revert_no();
+            }| 
+            IDENTIFIER{
+                check_var($1, nivel_block_current, function_current);
+                 create_no($1, IDENTIFIER);
+                revert_no();
+            }| 
+            TEXT{
+                errors += checkString($1, nivel_block_current, function_current);
+                create_no($1, TEXT);
+                revert_no();
+            }
+            | IDENTIFIER{
+                create_no($1, CALL_FUNCTION);
+            } LP parameter_func RP {
+                add_call(current_tree);
+                revert_no();            
+            }
 ;
 logic_c: /* empty */
     | LOGIC {
@@ -273,53 +369,103 @@ condition_pod: /* empty */ {revert_no();}
         RC{
             revert_no();
         }
+        | ELSE condition
 ;
 breakkk: BREAK_TOKEN {
             create_no(NULL, BREAK_TOKEN);
+            errors += check_break(yylineno);
             revert_no();
         } FINALIZE
 ;
-return_ss: RETURN_TOKEN FINALIZE{
+return_ss: RETURN_TOKEN{
             create_no(NULL, RETURN_TOKEN);
+        }
+        return_type 
+        FINALIZE{
+            errors+= check_return();
             revert_no();
         }
-        | RETURN_TOKEN IDENTIFIER FINALIZE{
-            create_no(NULL, RETURN_TOKEN);
-            revert_no();
-            create_no($2, IDENTIFIER);
-            revert_no();
-        }
-        | RETURN_TOKEN TEXT FINALIZE{
-            create_no($2, TEXT);
-            revert_no();
-        }
-        | RETURN_TOKEN{
-            create_no(NULL, RETURN_TOKEN);
-            revert_no();
-        } operation FINALIZE
 ;
-
+return_type: /* empty */ 
+            | IDENTIFIER{
+                create_no($1, IDENTIFIER);
+                revert_no();  
+            }
+            | TEXT{
+                errors += checkString($1, nivel_block_current, function_current);
+                create_no($1, TEXT);
+                revert_no();  
+            }
+            | IDENTIFIER{
+                create_no($1, CALL_FUNCTION);
+            } LP parameter_func RP {
+                add_call(current_tree);
+                revert_no();            
+            }
+;
+call_function: IDENTIFIER{
+            create_no($1, CALL_FUNCTION);
+        } LP parameter_func RP {
+            add_call(current_tree);
+            revert_no();            
+        }
+        FINALIZE
+;
+parameter_func: /* empty */
+            |IDENTIFIER{
+                create_no($1, CALL_PARAM);
+                revert_no();            
+            } parameter_final
+            |NUM{
+                create_no($1, CALL_PARAM);
+                revert_no();            
+            } parameter_final
+            |TEXT{
+                create_no($1, CALL_PARAM);
+                revert_no();            
+            } parameter_final
+            |IDENTIFIER LP{
+                 create_no($1, CALL_FUNCTION);
+            } parameter_func {
+              add_call(current_tree);
+             revert_no(); 
+            } RP parameter_final
+;
+parameter_final: /* empty */
+                |COMMA parameter_func
+;
 %%
-/*=========================================================================
-MAIN
-=========================================================================*/
+
+void addFuncs(){
+    char** p =  (char **) malloc(sizeof(char *) * 2);
+    char c[] = "String";
+    p[0] = (char *) malloc (strlen("String")+1);
+    strcpy(p[0], c);
+    putsymfunc ("println", p, 1, "Void" );
+    putsymfunc ("print", p, 1, "Void" );
+}
+
 void main( int argc, char *argv[] ){ 
     extern FILE *yyin;
     ++argv; --argc;
+    addFuncs();
     yyin = fopen( argv[0], "r" );
     errors = 0;
     yyparse ();
+    errors += valid();
+    errors += check_returns_f();
     if ( errors == 0 ){ 
+        showFuncTable();
+        showVarTable();
+        showCallTable();
         print_code ();
         printf ( "Sucessfull Parse Completed!!!\n" );
+    }else{
+        printf ( "Error Parse not Completed\n" );
     }
 }
-/*=========================================================================
-YYERROR
-=========================================================================*/
-int yyerror ( char *s ) /* Called by yyparse on error */
-{
+
+int yyerror ( char *s ) {
     errors++;
     printf("%s - not expected \"%s\" line %d\n", s, yylval, yylineno);
 }
-/**************************** End Grammar File ***************************/

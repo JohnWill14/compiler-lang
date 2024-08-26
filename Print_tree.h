@@ -1,12 +1,8 @@
-/***************************************************************************
-Code Generator
-***************************************************************************/
 
 #include "Parser.tab.h" /* for token definitions and yylval */
-
-void addSpace(int space){
-    for(int i=0;i<space;i++){
-        printf(" ");
+void addSpace(int nivel) {
+    for (int i = 0; i < nivel; i++) {
+        printf("  ");
     }
 }
 
@@ -92,39 +88,56 @@ char* getCode(int code){
 
 }
 
-void showTree(Tree* tree, int nivel){
-    if(tree == NULL){
+int check_break(int line){
+  Tree* it = current_tree;
+
+    while( it!= NULL){
+        if(it->command == WHILE) {
+          return 0;
+        }  
+
+        if(it->command == FUN){
+            break;
+        }
+        it = it->parent;
+    }
+    printf("Break line %d is not inserted inside a loop\n", line);
+    return 1;
+}
+void showTree(Tree *tree, int nivel) {
+    if (tree == NULL) {
         return;
     }
-    addSpace(nivel);
-    printf("- label: %s\n", tree->label);
-    addSpace(nivel);
-    printf("CODE: %s\n", getCode(tree->command));
-    addSpace(nivel);
-    printf("nivel: %d\n", nivel/3);
-    addSpace(nivel);
-    if(list_get_size(tree->neighbors) >0){
-        printf("arvores %d =>\n", list_get_size(tree->neighbors));
-        list_forEach(no, tree->neighbors){
-            if(no == NULL){
-                continue;
-            }
-            Tree* t = getValue(no, Tree*);
-            showTree(t, nivel+3);
+
+    
+    if (nivel == 0) {
+        printf("%s\n", tree->label); // Nó raiz
+    } else {
+        addSpace(nivel);
+        if (tree->label == NULL) {
+            printf("└── %s: %d\n", getCode(tree->command), nivel); // Nó filho
+        } else {
+            printf(" └── %s (%s) : %d\n", tree->label, getCode(tree->command), nivel); 
         }
     }
 
-
+    // Imprime os filhos recursivamente
+    if (list_get_size(tree->neighbors) > 0) {
+        for (int i = 0; i < list_get_size(tree->neighbors) - 1; i++) {
+            Tree *t = getValue(list_getItem(tree->neighbors, i), Tree *);
+            showTree(t, nivel + 1);
+            addSpace(nivel);
+        }
+        Tree *t = getValue(list_getItem(tree->neighbors, list_get_size(tree->neighbors) - 1), Tree *);
+        showTree(t, nivel + 1);
+    }
 }
 
-
-void print_code(){
-    list_forEach(t, trees_history){
-        Tree* tree = getValue(t, Tree*);
-        showTree(tree, 0);
-         
+void print_code() {
+    list_forEach(t, trees_history) {
+        Tree *tree = getValue(t, Tree *);
+        showTree(tree, 0); 
         free(tree);
         puts("\n\n");
     }
 }
-/************************** End Code Generator **************************/

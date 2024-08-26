@@ -89,28 +89,29 @@ extern int yydebug;
     BREAK_TOKEN = 290,             /* BREAK_TOKEN  */
     RETURN_TOKEN = 291,            /* RETURN_TOKEN  */
     ALLOC_LABEL = 292,             /* ALLOC_LABEL  */
-    OPERATION_LABEL = 293          /* OPERATION_LABEL  */
+    OPERATION_LABEL = 293,         /* OPERATION_LABEL  */
+    CALL_FUNCTION = 294,           /* CALL_FUNCTION  */
+    CALL_PARAM = 295               /* CALL_PARAM  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-#line 58 "Parser.y"
+#line 107 "Parser.y"
 union semrec
 {
-#line 58 "Parser.y"
- /* The Semantic Records */
+#line 107 "Parser.y"
+ 
 
-    int intval; /* Integer values */
-    int doubleval; /* Double values */
-    char *id; /* Identifiers */
-    struct lbs *lbls; /* For backpatching */
+    int intval; 
+    int doubleval; 
+    char *id;
 
-#line 111 "Parser.tab.h"
+#line 112 "Parser.tab.h"
 
 };
-#line 58 "Parser.y"
+#line 107 "Parser.y"
 typedef union semrec YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
