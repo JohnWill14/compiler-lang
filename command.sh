@@ -1,3 +1,3 @@
- bison  -d Parser.y
+sbison  -d Parser.y
 flex scanner.l
 gcc -o Lang *.c -lm
