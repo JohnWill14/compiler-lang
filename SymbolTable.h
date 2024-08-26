@@ -575,37 +575,37 @@ int validParamPrimitivo(char* expected, char* code, int nivel, char* function){
         if (strcmp(expected, "Int") == 0){
             int check = isInteger(code);
             if(check == 0){
-                printf("%s is not Int", code);
+                printf("%s is not Int\n", code);
                 return 1;
             }
         } else if (strcmp(expected, "Long") == 0){
             int check = isLong(code);
             if(check == 0){
-                printf("%s is not Long", code);
+                printf("%s is not Long\n", code);
                 return 1;
             }
         } else if (strcmp(expected, "String") == 0){
             int check = checkString(code, nivel,  function);
             if(check == 1){
-                printf("%s is not a valid string ", code);
+                printf("%s is not a valid string\n", code);
                 return 1;
             }
         } else if (strcmp(expected, "Float") == 0){
             int check = isFloat(code);
             if(check == 0){
-                printf("%s is not Float", code);
+                printf("%s is not Float\n", code);
                 return 1;
             }
         } else if (strcmp(expected,"Double") == 0){
             int check = isDouble(code);
             if(check == 0){
-                printf("%s is not Double", code);
+                printf("%s is not Double\n", code);
                 return 1;
             }
         } else if (strcmp(expected, "Boolean") == 0){
             int check = isBoolean(code);
                 if(check == 0){
-                    printf("%s is not Boolean", code);
+                    printf("%s is not Boolean\n", code);
                     return 1;
                 }
         } else {
